@@ -1,0 +1,127 @@
+﻿@page "/checkout"
+@rendermode InteractiveServer
+@using YKInventory.Models
+@using System.Net.Http.Json
+@inject HttpClient Http
+
+<h2>✅ Check Out Asset</h2>
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <div class="mb-3">
+                    <label>Select Asset</label>
+                    <select class="form-control" @bind="selectedAssetId">
+                        <option value="0">-- Select Asset --</option>
+                        @foreach (var a in availableAssets)
+                        {
+                            <option value="@a.Id">@a.AssetTag - @a.Name (@a.Category)</option>
+                        }
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label>Select Employee</label>
+                    <select class="form-control" @bind="selectedEmployeeId">
+                        <option value="0">-- Select Employee --</option>
+                        @foreach (var e in employees)
+                        {
+                            <option value="@e.Id">@e.EmployeeCode - @e.FullName (@e.Department)</option>
+                        }
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label>Quantity</label>
+                    <input type="number" class="form-control" @bind="quantity" />
+                </div>
+                <div class="mb-3">
+                    <label>Expected Return Date</label>
+                    <input type="date" class="form-control" @bind="expectedReturnDate" />
+                </div>
+                <div class="mb-3">
+                    <label>Remarks</label>
+                    <textarea class="form-control" rows="3" placeholder="Purpose of taking this asset..." @bind="remarks"></textarea>
+                </div>
+                <button class="btn btn-primary" @onclick="CheckoutAsset">Confirm Checkout</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(message))
+{
+    <div class='alert alert-info mt-3'>@message</div>
+}
+
+@code {
+    private List<Asset> availableAssets = new();
+    private List<Employee> employees = new();
+    private int selectedAssetId = 0, selectedEmployeeId = 0, quantity = 1;
+    private DateTime expectedReturnDate = DateTime.Now.AddMonths(3);
+    private string remarks = "";
+    private string message = "";
+    private string apiBase = "http://localhost:5168";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        try
+        {
+            availableAssets = await Http.GetFromJsonAsync<List<Asset>>($"{apiBase}/api/assets/available") ?? new();
+            employees = await Http.GetFromJsonAsync<List<Employee>>($"{apiBase}/api/employees") ?? new();
+        }
+        catch (Exception ex)
+        {
+            message = $"Error: {ex.Message}";
+        }
+        StateHasChanged();
+    }
+
+    private async Task CheckoutAsset()
+    {
+        if (selectedAssetId == 0 || selectedEmployeeId == 0)
+        {
+            message = "Please select both asset and employee";
+            return;
+        }
+
+        try
+        {
+            var request = new
+            {
+                assetId = selectedAssetId,
+                employeeId = selectedEmployeeId,
+                quantity = quantity,
+                expectedReturnDate = expectedReturnDate,
+                remarks = remarks
+            };
+
+            var response = await Http.PostAsJsonAsync($"{apiBase}/api/checkout", request);
+            if (response.IsSuccessStatusCode)
+            {
+                message = "✓ Asset checked out successfully!";
+                await LoadData();
+                selectedAssetId = 0;
+                selectedEmployeeId = 0;
+                quantity = 1;
+                expectedReturnDate = DateTime.Now.AddMonths(3);
+                remarks = "";
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                message = $"Error: {error}";
+            }
+        }
+        catch (Exception ex)
+        {
+            message = $"Error: {ex.Message}";
+        }
+        StateHasChanged();
+    }
+}

@@ -1,0 +1,309 @@
+﻿@page "/employees"
+@rendermode InteractiveServer
+@using YKInventory.Models
+@using System.Net.Http.Json
+@inject HttpClient Http
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>👥 Employee Management</h2>
+    <span class="badge bg-primary">Total: @(employees?.Count ?? 0)</span>
+</div>
+<hr />
+
+<div class="table-toolbar">
+    <button class='btn btn-primary' @onclick='OpenAddForm'>+ Add New Employee</button>
+    <div class="search-box">
+        <input class="form-control" placeholder="Search employees..." @bind="employeeSearch" @bind:event="oninput" />
+    </div>
+</div>
+
+@if (showModal)
+{
+    <div class='modal-overlay'>
+        <div class='modal-container'>
+            <div class='modal-header bg-primary text-white'>
+                <h5 class='modal-title'>@(isEditing ? "✏️ Edit Employee" : "➕ Add New Employee")</h5>
+                <button type='button' class='btn-close btn-close-white' @onclick='CloseModal'></button>
+            </div>
+            <div class='modal-body'>
+                <div class='mb-3'>
+                    <label class='fw-bold'>Employee Code <span class='text-danger'>*</span></label>
+                    <input class='form-control' placeholder='e.g., YK-EMP-001' @bind='formEmployee.EmployeeCode' />
+                    <small class='text-muted'>Unique identifier</small>
+                </div>
+                <div class='mb-3'>
+                    <label class='fw-bold'>Full Name <span class='text-danger'>*</span></label>
+                    <input class='form-control' placeholder='e.g., John Doe' @bind='formEmployee.FullName' />
+                    <small class='text-muted'>Complete name</small>
+                </div>
+                <div class='mb-3'>
+                    <label class='fw-bold'>Email <span class='text-danger'>*</span></label>
+                    <input class='form-control' type='email' placeholder='john@company.com' @bind='formEmployee.Email' />
+                    <small class='text-muted'>Email address</small>
+                </div>
+                <div class='mb-3'>
+                    <label class='fw-bold'>Department</label>
+                    <input class='form-control' placeholder='Engineering, Sales, HR' @bind='formEmployee.Department' />
+                    <small class='text-muted'>Department name</small>
+                </div>
+                <div class='mb-3'>
+                    <label class='fw-bold'>Designation</label>
+                    <input class='form-control' placeholder='Senior Developer, Manager' @bind='formEmployee.Designation' />
+                    <small class='text-muted'>Job title</small>
+                </div>
+                <div class='mb-3'>
+                    <label class='fw-bold'>Joining Date</label>
+                    <input class='form-control' type='date' @bind='formEmployee.JoiningDate' />
+                    <small class='text-muted'>Date of joining</small>
+                </div>
+                <div class='mb-3'>
+                    <label class='fw-bold'>Status</label>
+                    <select class='form-control' @bind='selectedStatus'>
+                        <option value="true">Active</option>
+                        <option value="false">Inactive</option>
+                    </select>
+                    <small class='text-muted'>Employment status</small>
+                </div>
+            </div>
+            <div class='modal-footer'>
+                <button class='btn btn-secondary' @onclick='CloseModal'>Cancel</button>
+                <button class='btn btn-primary' @onclick='SaveEmployee'>Save</button>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="table-responsive inventory-table-wrap">
+    <table class='table table-striped table-bordered align-middle inventory-table'>
+        <thead class='table-dark'>
+            <tr>
+                <th>Employee Code</th>
+                <th>Full Name</th>
+                <th>Email</th>
+                <th>Department</th>
+                <th>Designation</th>
+                <th>Joining Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (!FilteredEmployees.Any())
+            {
+                <tr><td colspan='8' class='text-center'>No employees found.</td></tr>
+            }
+            else
+            {
+                @foreach (var e in FilteredEmployees)
+                {
+                    <tr>
+                        <td>@e.EmployeeCode</td>
+                        <td>@e.FullName</td>
+                        <td>@e.Email</td>
+                        <td>@e.Department</td>
+                        <td>@e.Designation</td>
+                        <td>@e.JoiningDate.ToString("yyyy-MM-dd")</td>
+                        <td><span class='badge @(e.IsActive ? "bg-success" : "bg-danger")'>@(e.IsActive ? "Active" : "Inactive")</span></td>
+                        <td>
+                            <button class='btn btn-warning btn-sm me-1' @onclick='() => EditEmployee(e)'>Edit</button>
+                            <button class='btn btn-danger btn-sm' @onclick='() => DeleteEmployee(e.Id)'>Delete</button>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+@if (!string.IsNullOrEmpty(message))
+{
+    <div class='alert alert-info mt-3'>@message</div>
+}
+
+<style>
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .modal-container {
+        background: white;
+        border-radius: 8px;
+        width: 90%;
+        max-width: 600px;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    .modal-header {
+        padding: 15px 20px;
+        border-bottom: 1px solid #dee2e6;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .modal-body {
+        padding: 20px;
+    }
+    .modal-footer {
+        padding: 15px 20px;
+        border-top: 1px solid #dee2e6;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+    .btn-close {
+        background: transparent;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: white;
+    }
+</style>
+
+@code {
+    private List<Employee>? employees;
+    private bool showModal = false;
+    private bool isEditing = false;
+    private Employee formEmployee = new Employee();
+    private string message = "";
+    private string apiBase = "http://localhost:5168";
+    private string selectedStatus = "true";
+    private string employeeSearch = "";
+
+    private IEnumerable<Employee> FilteredEmployees =>
+        string.IsNullOrWhiteSpace(employeeSearch)
+            ? employees ?? Enumerable.Empty<Employee>()
+            : (employees ?? Enumerable.Empty<Employee>()).Where(e => SearchMatches(
+                employeeSearch,
+                e.EmployeeCode,
+                e.FullName,
+                e.Email,
+                e.Department,
+                e.Designation,
+                e.JoiningDate.ToString("yyyy-MM-dd"),
+                e.IsActive ? "Active" : "Inactive"));
+
+    private static bool SearchMatches(string search, params string?[] values) =>
+        values.Any(value => !string.IsNullOrWhiteSpace(value) &&
+                            value.Contains(search, StringComparison.OrdinalIgnoreCase));
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadEmployees();
+    }
+
+    private async Task LoadEmployees()
+    {
+        try
+        {
+            employees = await Http.GetFromJsonAsync<List<Employee>>($"{apiBase}/api/employees");
+            message = employees != null ? $"✓ Loaded {employees.Count} employees" : "No employees found";
+        }
+        catch (Exception ex)
+        {
+            message = $"✗ Error: {ex.Message}";
+        }
+        StateHasChanged();
+    }
+
+    private void OpenAddForm()
+    {
+        isEditing = false;
+        formEmployee = new Employee { IsActive = true, JoiningDate = DateTime.Now };
+        selectedStatus = "true";
+        showModal = true;
+        StateHasChanged();
+    }
+
+    private void EditEmployee(Employee employee)
+    {
+        isEditing = true;
+        formEmployee = new Employee
+        {
+            Id = employee.Id,
+            EmployeeCode = employee.EmployeeCode,
+            FullName = employee.FullName,
+            Email = employee.Email,
+            Department = employee.Department,
+            Designation = employee.Designation,
+            JoiningDate = employee.JoiningDate,
+            IsActive = employee.IsActive
+        };
+        selectedStatus = employee.IsActive.ToString().ToLower();
+        showModal = true;
+        StateHasChanged();
+    }
+
+    private void CloseModal()
+    {
+        showModal = false;
+        isEditing = false;
+        StateHasChanged();
+    }
+
+    private async Task SaveEmployee()
+    {
+        try
+        {
+            message = "💾 Saving...";
+            StateHasChanged();
+            
+            formEmployee.IsActive = selectedStatus == "true";
+            
+            HttpResponseMessage response;
+            if (isEditing)
+            {
+                response = await Http.PutAsJsonAsync($"{apiBase}/api/employees/{formEmployee.Id}", formEmployee);
+            }
+            else
+            {
+                response = await Http.PostAsJsonAsync($"{apiBase}/api/employees", formEmployee);
+            }
+            
+            if (response.IsSuccessStatusCode)
+            {
+                message = isEditing ? "✓ Employee updated!" : "✓ Employee saved!";
+                await LoadEmployees();
+                CloseModal();
+            }
+            else
+            {
+                message = "✗ Failed to save";
+            }
+        }
+        catch (Exception ex)
+        {
+            message = $"✗ Error: {ex.Message}";
+        }
+        StateHasChanged();
+    }
+
+    private async Task DeleteEmployee(int id)
+    {
+        try
+        {
+            var response = await Http.DeleteAsync($"{apiBase}/api/employees/{id}");
+            if (response.IsSuccessStatusCode)
+            {
+                message = "✓ Employee deleted!";
+                await LoadEmployees();
+            }
+            else
+            {
+                message = "✗ Delete failed";
+            }
+        }
+        catch (Exception ex)
+        {
+            message = $"✗ Error: {ex.Message}";
+        }
+        StateHasChanged();
+    }
+}

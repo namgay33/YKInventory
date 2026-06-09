@@ -6,7 +6,7 @@
 @inject IJSRuntime JS
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h2>?? Asset Management</h2>
+    <h2>📦 Asset Management</h2>
     <div>
         <span class="badge bg-primary me-2">Total: @(assets?.Count ?? 0)</span>
         <span class="badge bg-success">Available: @assets?.Count(a => a.Status == "Available")</span>
@@ -15,7 +15,7 @@
 <hr />
 
 <div class="table-toolbar">
-    <button class='btn btn-primary' @onclick='OpenAddForm'>+ Add New Asset</button>
+    <button class='btn btn-primary' @onclick='OpenAddForm'>➕ Add New Asset</button>
     <div class="search-box">
         <input class="form-control" placeholder="Search assets..." @bind="assetSearch" @bind:event="oninput" />
     </div>
@@ -26,7 +26,7 @@
     <div class='modal-overlay'>
         <div class='modal-container'>
             <div class='modal-header bg-primary text-white'>
-                <h5 class='modal-title'>@(isEditing ? "?? Edit Asset" : "? Add New Asset")</h5>
+                <h5 class='modal-title'>@(isEditing ? "✏️ Edit Asset" : "➕ Add New Asset")</h5>
                 <button type='button' class='btn-close btn-close-white' @onclick='CloseModal'></button>
             </div>
             <div class='modal-body'>
@@ -251,11 +251,11 @@
         try
         {
             assets = await Http.GetFromJsonAsync<List<Asset>>($"{apiBase}/api/assets");
-            message = assets != null ? $"? Loaded {assets.Count} assets" : "No assets found";
+            message = assets != null ? $"✓ Loaded {assets.Count} assets" : "No assets found";
         }
         catch (Exception ex)
         {
-            message = $"? Error: {ex.Message}";
+            message = $"✗ Error: {ex.Message}";
         }
         StateHasChanged();
     }
@@ -301,7 +301,7 @@
     {
         try
         {
-            message = "?? Saving...";
+            message = "💾 Saving...";
             StateHasChanged();
             
             HttpResponseMessage response;
@@ -316,18 +316,18 @@
             
             if (response.IsSuccessStatusCode)
             {
-                message = isEditing ? "? Asset updated!" : "? Asset saved!";
+                message = isEditing ? "✓ Asset updated!" : "✓ Asset saved!";
                 await LoadAssets();
                 CloseModal();
             }
             else
             {
-                message = "? Failed to save";
+                message = "✗ Failed to save";
             }
         }
         catch (Exception ex)
         {
-            message = $"? Error: {ex.Message}";
+            message = $"✗ Error: {ex.Message}";
         }
         StateHasChanged();
     }
@@ -348,17 +348,17 @@
             var response = await Http.DeleteAsync($"{apiBase}/api/assets/{asset.Id}");
             if (response.IsSuccessStatusCode)
             {
-                message = "? Asset deleted!";
+                message = "✓ Asset deleted!";
                 await LoadAssets();
             }
             else
             {
-                message = "? Delete failed";
+                message = "✗ Delete failed";
             }
         }
         catch (Exception ex)
         {
-            message = $"? Error: {ex.Message}";
+            message = $"✗ Error: {ex.Message}";
         }
         StateHasChanged();
     }

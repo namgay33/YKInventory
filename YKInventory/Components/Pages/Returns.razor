@@ -5,7 +5,7 @@
 @using System.Net.Http.Json
 @inject HttpClient Http
 
-<h2>?? Return Asset</h2>
+<h2>🔄 Return Asset</h2>
 <hr />
 
 <div class="row">
@@ -13,29 +13,29 @@
         <div class="card">
             <div class="card-body">
                 <div class="mb-3">
-                    <label>Select Issued Asset to Return</label>
+                    <label>📋 Select Issued Asset to Return</label>
                     <select class="form-control" @bind="selectedTransactionId">
                         <option value="0">-- Select Asset to Return --</option>
                         @foreach (var t in issuedTransactions)
                         {
-                            <option value="@t.Id">@t.AssetTag - @t.AssetName (Issued to: @t.EmployeeName on @t.Date)</option>
+                            <option value="@t.Id">📦 @t.AssetTag - @t.AssetName (👤 Issued to: @t.EmployeeName on 📅 @t.Date)</option>
                         }
                     </select>
                 </div>
                 <div class="mb-3">
-                    <label>Condition on Return</label>
+                    <label>🔧 Condition on Return</label>
                     <select class="form-control" @bind="conditionOnReturn">
-                        <option value="Good">Good</option>
-                        <option value="Minor Damage">Minor Damage</option>
-                        <option value="Major Damage">Major Damage</option>
-                        <option value="Under Repair">Under Repair</option>
+                        <option value="Good">✅ Good</option>
+                        <option value="Minor Damage">⚠️ Minor Damage</option>
+                        <option value="Major Damage">❌ Major Damage</option>
+                        <option value="Under Repair">🔧 Under Repair</option>
                     </select>
                 </div>
                 <div class="mb-3">
-                    <label>Return Remarks</label>
+                    <label>📝 Return Remarks</label>
                     <textarea class="form-control" rows="3" placeholder="Any issues or notes about the asset..." @bind="returnRemarks"></textarea>
                 </div>
-                <button class="btn btn-warning" @onclick="ReturnAsset">Confirm Return</button>
+                <button class="btn btn-warning" @onclick="ReturnAsset">🔄 Confirm Return</button>
             </div>
         </div>
     </div>
@@ -80,11 +80,11 @@
         {
             var allTransactions = await Http.GetFromJsonAsync<List<TransactionViewModel>>($"{apiBase}/api/transactions");
             issuedTransactions = allTransactions?.Where(t => t.Status == "Issued").ToList() ?? new();
-            message = $"Found {issuedTransactions.Count} issued assets";
+            message = $"📋 Found {issuedTransactions.Count} issued assets";
         }
         catch (Exception ex)
         {
-            message = $"Error: {ex.Message}";
+            message = $"❌ Error: {ex.Message}";
         }
         StateHasChanged();
     }
@@ -93,7 +93,7 @@
     {
         if (selectedTransactionId == 0)
         {
-            message = "Please select an asset to return";
+            message = "⚠️ Please select an asset to return";
             return;
         }
 
@@ -109,7 +109,7 @@
             var response = await Http.PostAsJsonAsync($"{apiBase}/api/return", request);
             if (response.IsSuccessStatusCode)
             {
-                message = "? Asset returned successfully!";
+                message = "✅ Asset returned successfully!";
                 await LoadIssuedAssets();
                 selectedTransactionId = 0;
                 conditionOnReturn = "Good";
@@ -118,12 +118,12 @@
             else
             {
                 var error = await response.Content.ReadAsStringAsync();
-                message = $"Error: {error}";
+                message = $"❌ Error: {error}";
             }
         }
         catch (Exception ex)
         {
-            message = $"Error: {ex.Message}";
+            message = $"❌ Error: {ex.Message}";
         }
         StateHasChanged();
     }

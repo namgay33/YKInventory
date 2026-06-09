@@ -4,7 +4,7 @@
 @using System.Net.Http.Json
 @inject HttpClient Http
 
-<h2>? Check Out Asset</h2>
+<h2>✅ Check Out Asset</h2>
 <hr />
 
 <div class="row">
@@ -17,7 +17,7 @@
                         <option value="0">-- Select Asset --</option>
                         @foreach (var a in availableAssets)
                         {
-                            <option value="@a.Id">@a.AssetTag - @a.Name (@a.Category)</option>
+                            <option value="@a.Id">📦 @a.AssetTag - @a.Name (@a.Category)</option>
                         }
                     </select>
                 </div>
@@ -27,7 +27,7 @@
                         <option value="0">-- Select Employee --</option>
                         @foreach (var e in employees)
                         {
-                            <option value="@e.Id">@e.EmployeeCode - @e.FullName (@e.Department)</option>
+                            <option value="@e.Id">👤 @e.EmployeeCode - @e.FullName (@e.Department)</option>
                         }
                     </select>
                 </div>
@@ -43,7 +43,7 @@
                     <label>Remarks</label>
                     <textarea class="form-control" rows="3" placeholder="Purpose of taking this asset..." @bind="remarks"></textarea>
                 </div>
-                <button class="btn btn-primary" @onclick="CheckoutAsset">Confirm Checkout</button>
+                <button class="btn btn-success" @onclick="CheckoutAsset">✅ Confirm Checkout</button>
             </div>
         </div>
     </div>
@@ -79,7 +79,7 @@
         }
         catch (Exception ex)
         {
-            message = $"Error: {ex.Message}";
+            message = $"✗ Error: {ex.Message}";
         }
         StateHasChanged();
     }
@@ -88,7 +88,7 @@
     {
         if (selectedAssetId == 0 || selectedEmployeeId == 0)
         {
-            message = "Please select both asset and employee";
+            message = "⚠️ Please select both asset and employee";
             return;
         }
 
@@ -106,7 +106,7 @@
             var response = await Http.PostAsJsonAsync($"{apiBase}/api/checkout", request);
             if (response.IsSuccessStatusCode)
             {
-                message = "? Asset checked out successfully!";
+                message = "✅ Asset checked out successfully!";
                 await LoadData();
                 selectedAssetId = 0;
                 selectedEmployeeId = 0;
@@ -117,12 +117,12 @@
             else
             {
                 var error = await response.Content.ReadAsStringAsync();
-                message = $"Error: {error}";
+                message = $"✗ Error: {error}";
             }
         }
         catch (Exception ex)
         {
-            message = $"Error: {ex.Message}";
+            message = $"✗ Error: {ex.Message}";
         }
         StateHasChanged();
     }

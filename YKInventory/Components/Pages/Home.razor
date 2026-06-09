@@ -5,13 +5,13 @@
 @inject HttpClient Http
 
 <div class="container-fluid">
-    <h2 class="mb-4">?? YK Inventory Dashboard</h2>
+    <h2 class="mb-4">📊 YK Inventory Dashboard</h2>
     
     <div class="row">
         <div class="col-md-3 mb-3">
             <div class="card text-white bg-primary">
                 <div class="card-body">
-                    <h5 class="card-title">Total Assets</h5>
+                    <h5 class="card-title">📦 Total Assets</h5>
                     <h2 class="card-text">@totalAssets</h2>
                 </div>
             </div>
@@ -19,7 +19,7 @@
         <div class="col-md-3 mb-3">
             <div class="card text-white bg-success">
                 <div class="card-body">
-                    <h5 class="card-title">Available Assets</h5>
+                    <h5 class="card-title">✅ Available Assets</h5>
                     <h2 class="card-text">@availableAssets</h2>
                 </div>
             </div>
@@ -27,7 +27,7 @@
         <div class="col-md-3 mb-3">
             <div class="card text-white bg-warning">
                 <div class="card-body">
-                    <h5 class="card-title">Currently Issued</h5>
+                    <h5 class="card-title">📤 Currently Issued</h5>
                     <h2 class="card-text">@issuedAssets</h2>
                 </div>
             </div>
@@ -35,7 +35,7 @@
         <div class="col-md-3 mb-3">
             <div class="card text-white bg-info">
                 <div class="card-body">
-                    <h5 class="card-title">Total Employees</h5>
+                    <h5 class="card-title">👥 Total Employees</h5>
                     <h2 class="card-text">@totalEmployees</h2>
                 </div>
             </div>
@@ -46,21 +46,28 @@
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header bg-dark text-white">
-                    <h5>?? Recent Transactions</h5>
+                    <h5>📋 Recent Transactions</h5>
                 </div>
                 <div class="card-body">
                     <div class="search-box mb-3">
-                        <input class="form-control form-control-sm" placeholder="Search transactions..." @bind="recentTransactionSearch" @bind:event="oninput" />
+                        <input class="form-control form-control-sm" placeholder="🔍 Search transactions..." @bind="recentTransactionSearch" @bind:event="oninput" />
                     </div>
                     <div class="table-responsive">
-                        <table class='table table-sm'>
+                        <table class="table table-sm">
                             <thead>
-                                <tr><th>Date</th><th>Asset</th><th>Employee</th><th>Status</th></tr>
+                                <tr>
+                                    <th>📅 Date</th>
+                                    <th>📦 Asset</th>
+                                    <th>👤 Employee</th>
+                                    <th>📊 Status</th>
+                                </tr>
                             </thead>
                             <tbody>
                                 @if (!FilteredRecentTransactions.Any())
                                 {
-                                    <tr><td colspan='4' class='text-center'>No transactions found.</td></tr>
+                                    <tr>
+                                        <td colspan="4" class="text-center">No transactions found.</td>
+                                    </tr>
                                 }
                                 else
                                 {
@@ -83,21 +90,26 @@
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header bg-dark text-white">
-                    <h5>?? Expiring Warranty (Next 3 months)</h5>
+                    <h5>⚠️ Expiring Warranty (Next 3 months)</h5>
                 </div>
                 <div class="card-body">
                     <div class="search-box mb-3">
-                        <input class="form-control form-control-sm" placeholder="Search warranties..." @bind="warrantySearch" @bind:event="oninput" />
+                        <input class="form-control form-control-sm" placeholder="🔍 Search warranties..." @bind="warrantySearch" @bind:event="oninput" />
                     </div>
                     <div class="table-responsive">
-                        <table class='table table-sm'>
+                        <table class="table table-sm">
                             <thead>
-                                <tr><th>Asset</th><th>Warranty Expiry</th></tr>
+                                <tr>
+                                    <th>📦 Asset</th>
+                                    <th>📅 Warranty Expiry</th>
+                                </tr>
                             </thead>
                             <tbody>
                                 @if (!FilteredExpiringWarranty.Any())
                                 {
-                                    <tr><td colspan='2' class='text-center'>No warranties found.</td></tr>
+                                    <tr>
+                                        <td colspan="2" class="text-center">No warranties found.</td>
+                                    </tr>
                                 }
                                 else
                                 {

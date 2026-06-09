@@ -1,11 +1,11 @@
-﻿@page "/returns"
+@page "/returns"
 @rendermode InteractiveServer
 @using YKInventory.Models
 @using System.Text.Json
 @using System.Net.Http.Json
 @inject HttpClient Http
 
-<h2>🔄 Return Asset</h2>
+<h2>?? Return Asset</h2>
 <hr />
 
 <div class="row">
@@ -52,9 +52,9 @@
     private string conditionOnReturn = "Good";
     private string returnRemarks = "";
     private string message = "";
-    @* private string apiBase = "http://localhost:5168"; *@
-
-    private string apiBase = "";
+    private string apiBase = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production" 
+        ? "http://172.30.30.17:8080" 
+        : "http://localhost:5168";
 
     public class TransactionViewModel
     {
@@ -109,7 +109,7 @@
             var response = await Http.PostAsJsonAsync($"{apiBase}/api/return", request);
             if (response.IsSuccessStatusCode)
             {
-                message = "✓ Asset returned successfully!";
+                message = "? Asset returned successfully!";
                 await LoadIssuedAssets();
                 selectedTransactionId = 0;
                 conditionOnReturn = "Good";

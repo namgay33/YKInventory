@@ -59,7 +59,8 @@
 
 @code {
     private List<TransactionViewModel> transactions = new();
-    private string apiBase = "http://localhost:5168";
+    @* private string apiBase = "http://localhost:5168"; *@
+    private string apiBase = "";
     private string transactionSearch = "";
 
     private IEnumerable<TransactionViewModel> FilteredTransactions =>

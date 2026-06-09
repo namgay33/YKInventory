@@ -122,7 +122,10 @@
     private int totalAssets = 0, availableAssets = 0, issuedAssets = 0, totalEmployees = 0;
     private List<TransactionDto> recentTransactions = new();
     private List<Asset> expiringWarranty = new();
-    private string apiBase = "http://localhost:5168";
+    @* private string apiBase = "http://localhost:5168"; *@
+
+    private string apiBase = "";
+    
     private string recentTransactionSearch = "";
     private string warrantySearch = "";
 

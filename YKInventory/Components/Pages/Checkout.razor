@@ -4,55 +4,88 @@
 @using System.Net.Http.Json
 @inject HttpClient Http
 
-<h2>✅ Check Out Asset</h2>
-<hr />
+<style>
+    .checkout-container {
+        background-image: url('/images/background.png');
+        background-size: contain;
+        background-position: center;
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+        min-height: 100vh;
+        padding: 20px;
+        position: relative;
+    }
 
-<div class="row">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-body">
-                <div class="mb-3">
-                    <label>Select Asset</label>
-                    <select class="form-control" @bind="selectedAssetId">
-                        <option value="0">-- Select Asset --</option>
-                        @foreach (var a in availableAssets)
-                        {
-                            <option value="@a.Id">📦 @a.AssetTag - @a.Name (@a.Category)</option>
-                        }
-                    </select>
+    .checkout-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(255, 255, 255, 0.88);
+        z-index: 0;
+    }
+
+    .checkout-container > div {
+        position: relative;
+        z-index: 1;
+    }
+</style>
+
+<div class="checkout-container">
+    <div>
+        <h2>✅ Check Out Asset</h2>
+        <hr />
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label>Select Asset</label>
+                            <select class="form-control" @bind="selectedAssetId">
+                                <option value="0">-- Select Asset --</option>
+                                @foreach (var a in availableAssets)
+                                {
+                                    <option value="@a.Id">📦 @a.AssetTag - @a.Name (@a.Category)</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label>Select Employee</label>
+                            <select class="form-control" @bind="selectedEmployeeId">
+                                <option value="0">-- Select Employee --</option>
+                                @foreach (var e in employees)
+                                {
+                                    <option value="@e.Id">👤 @e.EmployeeCode - @e.FullName (@e.Department)</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label>Quantity</label>
+                            <input type="number" class="form-control" @bind="quantity" />
+                        </div>
+                        <div class="mb-3">
+                            <label>Expected Return Date</label>
+                            <input type="date" class="form-control" @bind="expectedReturnDate" />
+                        </div>
+                        <div class="mb-3">
+                            <label>Remarks</label>
+                            <textarea class="form-control" rows="3" placeholder="Purpose of taking this asset..." @bind="remarks"></textarea>
+                        </div>
+                        <button class="btn btn-success" @onclick="CheckoutAsset">✅ Confirm Checkout</button>
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label>Select Employee</label>
-                    <select class="form-control" @bind="selectedEmployeeId">
-                        <option value="0">-- Select Employee --</option>
-                        @foreach (var e in employees)
-                        {
-                            <option value="@e.Id">👤 @e.EmployeeCode - @e.FullName (@e.Department)</option>
-                        }
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label>Quantity</label>
-                    <input type="number" class="form-control" @bind="quantity" />
-                </div>
-                <div class="mb-3">
-                    <label>Expected Return Date</label>
-                    <input type="date" class="form-control" @bind="expectedReturnDate" />
-                </div>
-                <div class="mb-3">
-                    <label>Remarks</label>
-                    <textarea class="form-control" rows="3" placeholder="Purpose of taking this asset..." @bind="remarks"></textarea>
-                </div>
-                <button class="btn btn-success" @onclick="CheckoutAsset">✅ Confirm Checkout</button>
             </div>
         </div>
+
+        @if (!string.IsNullOrEmpty(message))
+        {
+            <div class='alert alert-info mt-3'>@message</div>
+        }
     </div>
 </div>
-
-@if (!string.IsNullOrEmpty(message))
-{
-    <div class='alert alert-info mt-3'>@message</div>
-}
 
 @code {
     private List<Asset> availableAssets = new();

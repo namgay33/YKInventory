@@ -5,46 +5,79 @@
 @using System.Net.Http.Json
 @inject HttpClient Http
 
-<h2>🔄 Return Asset</h2>
-<hr />
+<style>
+    .returns-container {
+        background-image: url('/images/background.png');
+        background-size: contain;
+        background-position: center;
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+        min-height: 100vh;
+        padding: 20px;
+        position: relative;
+    }
 
-<div class="row">
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-body">
-                <div class="mb-3">
-                    <label>📋 Select Issued Asset to Return</label>
-                    <select class="form-control" @bind="selectedTransactionId">
-                        <option value="0">-- Select Asset to Return --</option>
-                        @foreach (var t in issuedTransactions)
-                        {
-                            <option value="@t.Id">📦 @t.AssetTag - @t.AssetName (👤 Issued to: @t.EmployeeName on 📅 @t.Date)</option>
-                        }
-                    </select>
+    .returns-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(255, 255, 255, 0.88);
+        z-index: 0;
+    }
+
+    .returns-container > div {
+        position: relative;
+        z-index: 1;
+    }
+</style>
+
+<div class="returns-container">
+    <div>
+        <h2>🔄 Return Asset</h2>
+        <hr />
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label>📋 Select Issued Asset to Return</label>
+                            <select class="form-control" @bind="selectedTransactionId">
+                                <option value="0">-- Select Asset to Return --</option>
+                                @foreach (var t in issuedTransactions)
+                                {
+                                    <option value="@t.Id">📦 @t.AssetTag - @t.AssetName (👤 Issued to: @t.EmployeeName on 📅 @t.Date)</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label>🔧 Condition on Return</label>
+                            <select class="form-control" @bind="conditionOnReturn">
+                                <option value="Good">✅ Good</option>
+                                <option value="Minor Damage">⚠️ Minor Damage</option>
+                                <option value="Major Damage">❌ Major Damage</option>
+                                <option value="Under Repair">🔧 Under Repair</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label>📝 Return Remarks</label>
+                            <textarea class="form-control" rows="3" placeholder="Any issues or notes about the asset..." @bind="returnRemarks"></textarea>
+                        </div>
+                        <button class="btn btn-warning" @onclick="ReturnAsset">🔄 Confirm Return</button>
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label>🔧 Condition on Return</label>
-                    <select class="form-control" @bind="conditionOnReturn">
-                        <option value="Good">✅ Good</option>
-                        <option value="Minor Damage">⚠️ Minor Damage</option>
-                        <option value="Major Damage">❌ Major Damage</option>
-                        <option value="Under Repair">🔧 Under Repair</option>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label>📝 Return Remarks</label>
-                    <textarea class="form-control" rows="3" placeholder="Any issues or notes about the asset..." @bind="returnRemarks"></textarea>
-                </div>
-                <button class="btn btn-warning" @onclick="ReturnAsset">🔄 Confirm Return</button>
             </div>
         </div>
+
+        @if (!string.IsNullOrEmpty(message))
+        {
+            <div class='alert alert-info mt-3'>@message</div>
+        }
     </div>
 </div>
-
-@if (!string.IsNullOrEmpty(message))
-{
-    <div class='alert alert-info mt-3'>@message</div>
-}
 
 @code {
     private List<TransactionViewModel> issuedTransactions = new();

@@ -4,125 +4,165 @@
 @using System.Net.Http.Json
 @inject HttpClient Http
 
-<div class="container-fluid">
-    <h2 class="mb-4">📊 YPL Inventory Dashboard</h2>
+<style>
+    .dashboard-container {
+        background-image: url('/images/background.png');
+        background-size: contain;
+        background-position: center;
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+        min-height: 100vh;
+        padding: 20px;
+        position: relative;
+    }
     
-    <div class="row">
-        <div class="col-md-3 mb-3">
-            <div class="card text-white bg-primary">
-                <div class="card-body">
-                    <h5 class="card-title">📦 Total Assets</h5>
-                    <h2 class="card-text">@totalAssets</h2>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="card text-white bg-success">
-                <div class="card-body">
-                    <h5 class="card-title">✅ Available Assets</h5>
-                    <h2 class="card-text">@availableAssets</h2>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="card text-white bg-warning">
-                <div class="card-body">
-                    <h5 class="card-title">📤 Currently Issued</h5>
-                    <h2 class="card-text">@issuedAssets</h2>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="card text-white bg-info">
-                <div class="card-body">
-                    <h5 class="card-title">👥 Total Employees</h5>
-                    <h2 class="card-text">@totalEmployees</h2>
-                </div>
-            </div>
-        </div>
-    </div>
+    .dashboard-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(255, 255, 255, 0.88);
+        z-index: 0;
+    }
+    
+    .dashboard-container > div {
+        position: relative;
+        z-index: 1;
+    }
+    
+    .card {
+        backdrop-filter: blur(2px);
+        transition: transform 0.2s;
+    }
+    
+    .card:hover {
+        transform: translateY(-3px);
+    }
+</style>
 
-    <div class="row mt-4">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header bg-dark text-white">
-                    <h5>📋 Recent Transactions</h5>
-                </div>
-                <div class="card-body">
-                    <div class="search-box mb-3">
-                        <input class="form-control form-control-sm" placeholder="🔍 Search transactions..." @bind="recentTransactionSearch" @bind:event="oninput" />
+<div class="dashboard-container">
+    <div class="container-fluid">
+        <h2 class="mb-4">📊 YPL Inventory Dashboard</h2>
+        
+        <div class="row">
+            <div class="col-md-3 mb-3">
+                <div class="card text-white bg-primary">
+                    <div class="card-body">
+                        <h5 class="card-title">📦 Total Assets</h5>
+                        <h2 class="card-text">@totalAssets</h2>
                     </div>
-                    <div class="table-responsive">
-                        <table class="table table-sm">
-                            <thead>
-                                <tr>
-                                    <th>📅 Date</th>
-                                    <th>📦 Asset</th>
-                                    <th>👤 Employee</th>
-                                    <th>📊 Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @if (!FilteredRecentTransactions.Any())
-                                {
-                                    <tr>
-                                        <td colspan="4" class="text-center">No transactions found.</td>
-                                    </tr>
-                                }
-                                else
-                                {
-                                    @foreach (var t in FilteredRecentTransactions)
-                                    {
-                                        <tr>
-                                            <td>@t.Date</td>
-                                            <td>@t.AssetName</td>
-                                            <td>@t.EmployeeName</td>
-                                            <td><span class='badge @(t.Status == "Issued" ? "bg-warning" : "bg-success")'>@t.Status</span></td>
-                                        </tr>
-                                    }
-                                }
-                            </tbody>
-                        </table>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card text-white bg-success">
+                    <div class="card-body">
+                        <h5 class="card-title">✅ Available Assets</h5>
+                        <h2 class="card-text">@availableAssets</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card text-white bg-warning">
+                    <div class="card-body">
+                        <h5 class="card-title">📤 Currently Issued</h5>
+                        <h2 class="card-text">@issuedAssets</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card text-white bg-info">
+                    <div class="card-body">
+                        <h5 class="card-title">👥 Total Employees</h5>
+                        <h2 class="card-text">@totalEmployees</h2>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header bg-dark text-white">
-                    <h5>⚠️ Expiring Warranty (Next 3 months)</h5>
-                </div>
-                <div class="card-body">
-                    <div class="search-box mb-3">
-                        <input class="form-control form-control-sm" placeholder="🔍 Search warranties..." @bind="warrantySearch" @bind:event="oninput" />
+
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-dark text-white">
+                        <h5>📋 Recent Transactions</h5>
                     </div>
-                    <div class="table-responsive">
-                        <table class="table table-sm">
-                            <thead>
-                                <tr>
-                                    <th>📦 Asset</th>
-                                    <th>📅 Warranty Expiry</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @if (!FilteredExpiringWarranty.Any())
-                                {
+                    <div class="card-body">
+                        <div class="search-box mb-3">
+                            <input class="form-control form-control-sm" placeholder="🔍 Search transactions..." @bind="recentTransactionSearch" @bind:event="oninput" />
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
                                     <tr>
-                                        <td colspan="2" class="text-center">No warranties found.</td>
+                                        <th>📅 Date</th>
+                                        <th>📦 Asset</th>
+                                        <th>👤 Employee</th>
+                                        <th>📊 Status</th>
                                     </tr>
-                                }
-                                else
-                                {
-                                    @foreach (var a in FilteredExpiringWarranty)
+                                </thead>
+                                <tbody>
+                                    @if (!FilteredRecentTransactions.Any())
                                     {
                                         <tr>
-                                            <td>@a.Name</td>
-                                            <td>@a.WarrantyExpiry?.ToString("yyyy-MM-dd")</td>
+                                            <td colspan="4" class="text-center">No transactions found.</td>
                                         </tr>
                                     }
-                                }
-                            </tbody>
-                        </table>
+                                    else
+                                    {
+                                        @foreach (var t in FilteredRecentTransactions)
+                                        {
+                                            <tr>
+                                                <td>@t.Date</td>
+                                                <td>@t.AssetName</td>
+                                                <td>@t.EmployeeName</td>
+                                                <td><span class='badge @(t.Status == "Issued" ? "bg-warning" : "bg-success")'>@t.Status</span></td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-dark text-white">
+                        <h5>⚠️ Expiring Warranty (Next 3 months)</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="search-box mb-3">
+                            <input class="form-control form-control-sm" placeholder="🔍 Search warranties..." @bind="warrantySearch" @bind:event="oninput" />
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>📦 Asset</th>
+                                        <th>📅 Warranty Expiry</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (!FilteredExpiringWarranty.Any())
+                                    {
+                                        <tr>
+                                            <td colspan="2" class="text-center">No warranties found.</td>
+                                        </tr>
+                                    }
+                                    else
+                                    {
+                                        @foreach (var a in FilteredExpiringWarranty)
+                                        {
+                                            <tr>
+                                                <td>@a.Name</td>
+                                                <td>@a.WarrantyExpiry?.ToString("yyyy-MM-dd")</td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>

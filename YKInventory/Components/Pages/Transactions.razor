@@ -4,59 +4,92 @@
 @using System.Net.Http.Json
 @inject HttpClient Http
 
-<h2>📜 Transaction History</h2>
-<hr />
-<p>📋 Complete history of all asset checkouts and returns</p>
+<style>
+    .transactions-container {
+        background-image: url('/images/background.png');
+        background-size: contain;
+        background-position: center;
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+        min-height: 100vh;
+        padding: 20px;
+        position: relative;
+    }
 
-<div class="table-toolbar">
-    <div class="search-box ms-auto">
-        <input class="form-control" placeholder="🔍 Search transactions..." @bind="transactionSearch" @bind:event="oninput" />
-    </div>
-</div>
+    .transactions-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(255, 255, 255, 0.88);
+        z-index: 0;
+    }
 
-<div class="table-responsive inventory-table-wrap">
-    <table class='table table-striped table-bordered align-middle inventory-table'>
-        <thead class='table-dark'>
-            <tr>
-                <th>📅 Date</th>
-                <th>🏷️ Asset Tag</th>
-                <th>📦 Asset Name</th>
-                <th>👤 Employee</th>
-                <th>🏢 Department</th>
-                <th>🔢 Quantity</th>
-                <th>📊 Status</th>
-                <th>🔄 Returned On</th>
-                <th>🔧 Condition</th>
-                <th>📝 Remarks</th>
-            </tr>
-        </thead>
-        <tbody>
-            @if (!FilteredTransactions.Any())
-            {
-                <tr>
-                    <td colspan="10" class="text-center"> <span>📭 No transactions found. Check out an asset first. </span></td>
-                </tr>
-            }
-            else
-            {
-                @foreach (var t in FilteredTransactions)
-                {
+    .transactions-container > div {
+        position: relative;
+        z-index: 1;
+    }
+</style>
+
+<div class="transactions-container">
+    <div>
+        <h2>📜 Transaction History</h2>
+        <hr />
+        <p>📋 Complete history of all asset checkouts and returns</p>
+
+        <div class="table-toolbar">
+            <div class="search-box ms-auto">
+                <input class="form-control" placeholder="🔍 Search transactions..." @bind="transactionSearch" @bind:event="oninput" />
+            </div>
+        </div>
+
+        <div class="table-responsive inventory-table-wrap">
+            <table class='table table-striped table-bordered align-middle inventory-table'>
+                <thead class='table-dark'>
                     <tr>
-                        <td><span>@t.Date</span></td>
-                        <td><span>@t.AssetTag</span></td>
-                        <td><span>@t.AssetName</span></td>
-                        <td><span>@t.EmployeeName</span></td>
-                        <td><span>@t.Department</span></td>
-                        <td><span>@t.Quantity</span></td>
-                        <td><span class='badge @(t.Status == "Issued" ? "bg-warning" : "bg-success")'>@t.Status</span></td>
-                        <td><span>@(string.IsNullOrEmpty(t.ReturnedDate) ? "⏳ Not returned" : t.ReturnedDate)</span></td>
-                        <td><span>@(string.IsNullOrEmpty(t.Condition) ? "✅ N/A" : t.Condition)</span></td>
-                        <td><span>@(string.IsNullOrEmpty(t.Remarks) ? "—" : t.Remarks)</span></td>
+                        <th>📅 Date</th>
+                        <th>🏷️ Asset Tag</th>
+                        <th>📦 Asset Name</th>
+                        <th>👤 Employee</th>
+                        <th>🏢 Department</th>
+                        <th>🔢 Quantity</th>
+                        <th>📊 Status</th>
+                        <th>🔄 Returned On</th>
+                        <th>🔧 Condition</th>
+                        <th>📝 Remarks</th>
                     </tr>
-                }
-            }
-        </tbody>
-    </table>
+                </thead>
+                <tbody>
+                    @if (!FilteredTransactions.Any())
+                    {
+                        <tr>
+                            <td colspan="10" class="text-center">📭 No transactions found. Check out an asset first. </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var t in FilteredTransactions)
+                        {
+                            <tr>
+                                <td><span>@t.Date</span></td>
+                                <td><span>@t.AssetTag</span></td>
+                                <td><span>@t.AssetName</span></td>
+                                <td><span>@t.EmployeeName</span></td>
+                                <td><span>@t.Department</span></td>
+                                <td><span>@t.Quantity</span></td>
+                                <td><span class='badge @(t.Status == "Issued" ? "bg-warning" : "bg-success")'>@t.Status</span></td>
+                                <td><span>@(string.IsNullOrEmpty(t.ReturnedDate) ? "⏳ Not returned" : t.ReturnedDate)</span></td>
+                                <td><span>@(string.IsNullOrEmpty(t.Condition) ? "✅ N/A" : t.Condition)</span></td>
+                                <td><span>@(string.IsNullOrEmpty(t.Remarks) ? "—" : t.Remarks)</span></td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 @code {

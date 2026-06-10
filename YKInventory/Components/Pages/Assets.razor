@@ -15,6 +15,8 @@
         min-height: 100vh;
         padding: 20px;
         position: relative;
+        width: 100%;
+        box-sizing: border-box;
     }
 
     .assets-container::before {
@@ -28,13 +30,45 @@
         z-index: 0;
     }
 
-    .assets-container>div {
+    .assets-container > div {
         position: relative;
         z-index: 1;
     }
 
-    .card {
-        backdrop-filter: blur(2px);
+    .inventory-table-wrap {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        background: white;
+    }
+
+    .inventory-table {
+        width: 100%;
+        margin-bottom: 0;
+        border-collapse: collapse;
+        table-layout: auto;
+    }
+
+    .inventory-table th,
+    .inventory-table td {
+        vertical-align: middle;
+        padding: 0.75rem;
+        border: 1px solid #dee2e6;
+        word-break: break-word;
+        white-space: normal;
+    }
+
+    .inventory-table thead th {
+        white-space: nowrap;
+        background-color: #212529;
+        color: white;
+    }
+
+    .inventory-table td:nth-child(11) {
+        white-space: nowrap;
+        width: 1%;
     }
 
     .modal-overlay {
@@ -43,7 +77,7 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0, 0, 0, 0.5);
+        background: rgba(0, 0, 0, .5);
         z-index: 1000;
         display: flex;
         align-items: center;
@@ -86,6 +120,39 @@
         cursor: pointer;
         color: white;
     }
+
+    .table-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: .75rem;
+        margin-bottom: 1rem;
+    }
+
+    .search-box {
+        width: min(100%, 360px);
+    }
+
+    @@media (max-width: 768px) {
+        .d-flex.justify-content-between.align-items-center.mb-3 {
+            align-items: flex-start !important;
+            flex-direction: column;
+            gap: .75rem;
+        }
+
+        .table-toolbar {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .search-box {
+            width: 100%;
+        }
+
+        .table-toolbar .btn {
+            width: 100%;
+        }
+    }
 </style>
 
 <div class="assets-container">
@@ -93,7 +160,7 @@
         <h2>📦 Asset Management</h2>
         <div>
             <span class="badge bg-primary me-2">Total: @(assets?.Count ?? 0)</span>
-            <span class="badge bg-success">Available: @assets?.Count(a => a.Status == "Available")</span>
+            <span class="badge bg-success">Available: @(assets?.Count(a => a.Status == "Available") ?? 0)</span>
         </div>
     </div>
     <hr />
@@ -110,27 +177,26 @@
         <div class='modal-overlay'>
             <div class='modal-container'>
                 <div class='modal-header bg-primary text-white'>
-                    <h5 class='modal-title'>@(isEditing ? "✏️ Edit Asset" : "➕ Add New Asset")</h5>
+                    <h5 class='modal-title'>@(isEditing ? "️ Edit Asset" : "➕ Add New Asset")</h5>
                     <button type='button' class='btn-close btn-close-white' @onclick='CloseModal'></button>
                 </div>
                 <div class='modal-body'>
                     <div class='row'>
                         <div class='col-md-6 mb-3'>
                             <label class='fw-bold'>Asset Tag <span class='text-danger'>*</span></label>
-                            <input class='form-control' placeholder='e.g., YPL-LAP-001' @bind='formAsset.AssetTag' />
+                            <input class='form-control' placeholder='e.g., YPL-LAP-001' @bind='formAsset.AssetTag' required/>
                             <small class='text-muted'>Unique identifier</small>
                         </div>
                         <div class='col-md-6 mb-3'>
                             <label class='fw-bold'>Name <span class='text-danger'>*</span></label>
-                            <input class='form-control' placeholder='e.g., Dell XPS 15' @bind='formAsset.Name' />
+                            <input class='form-control' placeholder='e.g., Dell XPS 15' @bind='formAsset.Name' required/>
                             <small class='text-muted'>Asset name</small>
                         </div>
                     </div>
                     <div class='row'>
                         <div class='col-md-6 mb-3'>
                             <label class='fw-bold'>Category</label>
-                            <input class='form-control' placeholder='Laptop, Desktop, Monitor, Bag'
-                                   @bind='formAsset.Category' />
+                            <input class='form-control' placeholder='Laptop, Desktop, Monitor, Bag' @bind='formAsset.Category' />
                             <small class='text-muted'>Type of asset</small>
                         </div>
                         <div class='col-md-6 mb-3'>
@@ -154,8 +220,7 @@
                     <div class='row'>
                         <div class='col-md-6 mb-3'>
                             <label class='fw-bold'>Purchase Cost</label>
-                            <input class='form-control' type='number' step='0.01' placeholder='1899.99'
-                                   @bind='formAsset.PurchaseCost' />
+                            <input class='form-control' type='number' step='0.01' placeholder='1899.99' @bind='formAsset.PurchaseCost' />
                             <small class='text-muted'>Cost in USD</small>
                         </div>
                         <div class='col-md-6 mb-3'>
@@ -183,8 +248,7 @@
                     </div>
                     <div class='mb-3'>
                         <label class='fw-bold'>Specifications</label>
-                        <textarea class='form-control' rows='2' placeholder='32GB RAM, 1TB SSD, Intel i7'
-                                  @bind='formAsset.Specifications'></textarea>
+                        <textarea class='form-control' rows='2' placeholder='32GB RAM, 1TB SSD, Intel i7' @bind='formAsset.Specifications'></textarea>
                         <small class='text-muted'>Technical specs</small>
                     </div>
                 </div>
@@ -196,8 +260,8 @@
         </div>
     }
 
-    <div class="table-responsive inventory-table-wrap">
-        <table class='table table-striped table-bordered align-middle inventory-table'>
+    <div class="inventory-table-wrap shadow-sm">
+        <table class='table table-striped table-bordered align-middle inventory-table mb-0'>
             <thead class='table-dark'>
                 <tr>
                     <th>Asset Tag</th>
@@ -217,7 +281,7 @@
                 @if (!FilteredAssets.Any())
                 {
                     <tr>
-                        <td colspan='11' class='text-center'>📭 No assets found. Click Add button.</td>
+                        <td colspan="11" class="text-center">📭 No assets found. Click Add button. </td>
                     </tr>
                 }
                 else
@@ -234,11 +298,12 @@
                             <td>@a.PurchaseCost.ToString("N2")</td>
                             <td>@a.PurchaseDate.ToString("yyyy-MM-dd")</td>
                             <td>@(a.WarrantyExpiry?.ToString("yyyy-MM-dd") ?? "N/A")</td>
-                            <td><span class='badge @(a.Status == "Available" ? "bg-success" : "bg-warning")'>@a.Status</span>
-                            </td>
+                            <td><span class='badge @(a.Status == "Available" ? "bg-success" : "bg-warning")'>@a.Status </span></td>
                             <td>
-                                <button class='btn btn-warning btn-sm me-1' @onclick='() => EditAsset(a)'>Edit</button>
-                                <button class='btn btn-danger btn-sm' @onclick='() => DeleteAsset(a)'>Delete</button>
+                                <div class="d-flex justify-content-center gap-1">
+                                    <button class='btn btn-warning btn-sm' @onclick='() => EditAsset(a)'>✏️</button>
+                                    <button class='btn btn-danger btn-sm' @onclick='() => DeleteAsset(a)'>🗑️</button>
+                                </div>
                             </td>
                         </tr>
                     }
@@ -270,25 +335,16 @@
             ? assets ?? Enumerable.Empty<Asset>()
             : (assets ?? Enumerable.Empty<Asset>()).Where(a => SearchMatches(
                 assetSearch,
-                a.AssetTag,
-                a.Name,
-                a.Category,
-                a.Model,
-                a.SerialNumber,
-                a.Vendor,
-                a.PurchaseCost.ToString("N2"),
+                a.AssetTag, a.Name, a.Category, a.Model, a.SerialNumber,
+                a.Vendor, a.PurchaseCost.ToString("N2"),
                 a.PurchaseDate.ToString("yyyy-MM-dd"),
-                a.WarrantyExpiry?.ToString("yyyy-MM-dd"),
-                a.Status));
+                a.WarrantyExpiry?.ToString("yyyy-MM-dd"), a.Status));
 
     private static bool SearchMatches(string search, params string?[] values) =>
         values.Any(value => !string.IsNullOrWhiteSpace(value) &&
                             value.Contains(search, StringComparison.OrdinalIgnoreCase));
 
-    protected override async Task OnInitializedAsync()
-    {
-        await LoadAssets();
-    }
+    protected override async Task OnInitializedAsync() => await LoadAssets();
 
     private async Task LoadAssets()
     {
@@ -297,10 +353,7 @@
             assets = await Http.GetFromJsonAsync<List<Asset>>($"{apiBase}/api/assets");
             message = assets != null ? $"✓ Loaded {assets.Count} assets" : "No assets found";
         }
-        catch (Exception ex)
-        {
-            message = $"✗ Error: {ex.Message}";
-        }
+        catch (Exception ex) { message = $"✗ Error: {ex.Message}"; }
         StateHasChanged();
     }
 
@@ -334,76 +387,38 @@
         StateHasChanged();
     }
 
-    private void CloseModal()
-    {
-        showModal = false;
-        isEditing = false;
-        StateHasChanged();
-    }
+    private void CloseModal() { showModal = false; isEditing = false; StateHasChanged(); }
 
     private async Task SaveAsset()
     {
         try
         {
-            message = "💾 Saving...";
-            StateHasChanged();
-
-            HttpResponseMessage response;
-            if (isEditing)
-            {
-                response = await Http.PutAsJsonAsync($"{apiBase}/api/assets/{formAsset.Id}", formAsset);
-            }
-            else
-            {
-                response = await Http.PostAsJsonAsync($"{apiBase}/api/assets", formAsset);
-            }
+            message = "💾 Saving..."; StateHasChanged();
+            HttpResponseMessage response = isEditing
+                ? await Http.PutAsJsonAsync($"{apiBase}/api/assets/{formAsset.Id}", formAsset)
+                : await Http.PostAsJsonAsync($"{apiBase}/api/assets", formAsset);
 
             if (response.IsSuccessStatusCode)
             {
                 message = isEditing ? "✓ Asset updated!" : "✓ Asset saved!";
-                await LoadAssets();
-                CloseModal();
+                await LoadAssets(); CloseModal();
             }
-            else
-            {
-                message = "✗ Failed to save";
-            }
+            else { message = "✗ Failed to save"; }
         }
-        catch (Exception ex)
-        {
-            message = $"✗ Error: {ex.Message}";
-        }
+        catch (Exception ex) { message = $"✗ Error: {ex.Message}"; }
         StateHasChanged();
     }
 
     private async Task DeleteAsset(Asset asset)
     {
-        var confirmed = await JS.InvokeAsync<bool>(
-            "confirm",
-            $"Delete asset {asset.AssetTag} - {asset.Name}? This action cannot be undone.");
-
-        if (!confirmed)
-        {
-            return;
-        }
-
+        if (!await JS.InvokeAsync<bool>("confirm", $"Delete asset {asset.AssetTag}?")) return;
         try
         {
             var response = await Http.DeleteAsync($"{apiBase}/api/assets/{asset.Id}");
-            if (response.IsSuccessStatusCode)
-            {
-                message = "✓ Asset deleted!";
-                await LoadAssets();
-            }
-            else
-            {
-                message = "✗ Delete failed";
-            }
+            if (response.IsSuccessStatusCode) { message = "✓ Asset deleted!"; await LoadAssets(); }
+            else { message = "✗ Delete failed"; }
         }
-        catch (Exception ex)
-        {
-            message = $"✗ Error: {ex.Message}";
-        }
+        catch (Exception ex) { message = $"✗ Error: {ex.Message}"; }
         StateHasChanged();
     }
 }

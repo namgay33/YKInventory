@@ -15,6 +15,8 @@
         min-height: 100vh;
         padding: 20px;
         position: relative;
+        width: 100%;
+        box-sizing: border-box;
     }
 
     .returns-container::before {
@@ -32,51 +34,68 @@
         position: relative;
         z-index: 1;
     }
+
+    .form-card {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    @@media (max-width: 768px) {
+        .returns-container {
+            padding: 15px;
+        }
+        
+        h2 {
+            font-size: 1.5rem;
+        }
+    }
 </style>
 
 <div class="returns-container">
-    <div>
-        <h2>🔄 Return Asset</h2>
-        <hr />
-
-        <div class="row">
-            <div class="col-md-8">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="mb-3">
-                            <label>📋 Select Issued Asset to Return</label>
-                            <select class="form-control" @bind="selectedTransactionId">
-                                <option value="0">-- Select Asset to Return --</option>
-                                @foreach (var t in issuedTransactions)
-                                {
-                                    <option value="@t.Id">📦 @t.AssetTag - @t.AssetName (👤 Issued to: @t.EmployeeName on 📅 @t.Date)</option>
-                                }
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label>🔧 Condition on Return</label>
-                            <select class="form-control" @bind="conditionOnReturn">
-                                <option value="Good">✅ Good</option>
-                                <option value="Minor Damage">⚠️ Minor Damage</option>
-                                <option value="Major Damage">❌ Major Damage</option>
-                                <option value="Under Repair">🔧 Under Repair</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label>📝 Return Remarks</label>
-                            <textarea class="form-control" rows="3" placeholder="Any issues or notes about the asset..." @bind="returnRemarks"></textarea>
-                        </div>
-                        <button class="btn btn-warning" @onclick="ReturnAsset">🔄 Confirm Return</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        @if (!string.IsNullOrEmpty(message))
-        {
-            <div class='alert alert-info mt-3'>@message</div>
-        }
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2> Return Asset</h2>
     </div>
+    <hr />
+
+    <div class="form-card card shadow-sm">
+        <div class="card-body p-4">
+            <div class="mb-3">
+                <label class="fw-bold">📋 Select Issued Asset to Return <span class="text-danger">*</span></label>
+                <select class="form-control" @bind="selectedTransactionId">
+                    <option value="0">-- Select Asset to Return --</option>
+                    @foreach (var t in issuedTransactions)
+                    {
+                        <option value="@t.Id">📦 @t.AssetTag - @t.AssetName (👤 @t.EmployeeName on 📅 @t.Date)</option>
+                    }
+                </select>
+                <small class="text-muted">Choose an asset currently issued to return it</small>
+            </div>
+
+            <div class="mb-3">
+                <label class="fw-bold"> Condition on Return</label>
+                <select class="form-control" @bind="conditionOnReturn">
+                    <option value="Good">✅ Good</option>
+                    <option value="Minor Damage">️ Minor Damage</option>
+                    <option value="Major Damage">❌ Major Damage</option>
+                    <option value="Under Repair">🔧 Under Repair</option>
+                </select>
+                <small class="text-muted">Current physical state of the asset</small>
+            </div>
+
+            <div class="mb-3">
+                <label class="fw-bold">📝 Return Remarks</label>
+                <textarea class="form-control" rows="3" placeholder="Any issues or notes about the asset..." @bind="returnRemarks"></textarea>
+                <small class="text-muted">Optional details about the return condition</small>
+            </div>
+
+            <button class="btn btn-warning w-100" @onclick="ReturnAsset">🔄 Confirm Return</button>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(message))
+    {
+        <div class='alert alert-info mt-3'>@message</div>
+    }
 </div>
 
 @code {

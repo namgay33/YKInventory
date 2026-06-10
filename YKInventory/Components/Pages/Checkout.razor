@@ -14,6 +14,8 @@
         min-height: 100vh;
         padding: 20px;
         position: relative;
+        width: 100%;
+        box-sizing: border-box;
     }
 
     .checkout-container::before {
@@ -31,60 +33,82 @@
         position: relative;
         z-index: 1;
     }
+
+    .form-card {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    @@media (max-width: 768px) {
+        .checkout-container {
+            padding: 15px;
+        }
+        
+        h2 {
+            font-size: 1.5rem;
+        }
+    }
 </style>
 
 <div class="checkout-container">
-    <div>
+    <div class="d-flex justify-content-between align-items-center mb-3">
         <h2>✅ Check Out Asset</h2>
-        <hr />
+    </div>
+    <hr />
 
-        <div class="row">
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="mb-3">
-                            <label>Select Asset</label>
-                            <select class="form-control" @bind="selectedAssetId">
-                                <option value="0">-- Select Asset --</option>
-                                @foreach (var a in availableAssets)
-                                {
-                                    <option value="@a.Id">📦 @a.AssetTag - @a.Name (@a.Category)</option>
-                                }
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label>Select Employee</label>
-                            <select class="form-control" @bind="selectedEmployeeId">
-                                <option value="0">-- Select Employee --</option>
-                                @foreach (var e in employees)
-                                {
-                                    <option value="@e.Id">👤 @e.EmployeeCode - @e.FullName (@e.Department)</option>
-                                }
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label>Quantity</label>
-                            <input type="number" class="form-control" @bind="quantity" />
-                        </div>
-                        <div class="mb-3">
-                            <label>Expected Return Date</label>
-                            <input type="date" class="form-control" @bind="expectedReturnDate" />
-                        </div>
-                        <div class="mb-3">
-                            <label>Remarks</label>
-                            <textarea class="form-control" rows="3" placeholder="Purpose of taking this asset..." @bind="remarks"></textarea>
-                        </div>
-                        <button class="btn btn-success" @onclick="CheckoutAsset">✅ Confirm Checkout</button>
-                    </div>
+    <div class="form-card card shadow-sm">
+        <div class="card-body p-4">
+            <div class="mb-3">
+                <label class="fw-bold">Select Asset <span class="text-danger">*</span></label>
+                <select class="form-control" @bind="selectedAssetId">
+                    <option value="0">-- Select Asset --</option>
+                    @foreach (var a in availableAssets)
+                    {
+                        <option value="@a.Id">📦 @a.AssetTag - @a.Name (@a.Category)</option>
+                    }
+                </select>
+                <small class="text-muted">Choose an available asset to check out</small>
+            </div>
+
+            <div class="mb-3">
+                <label class="fw-bold">Select Employee <span class="text-danger">*</span></label>
+                <select class="form-control" @bind="selectedEmployeeId">
+                    <option value="0">-- Select Employee --</option>
+                    @foreach (var e in employees)
+                    {
+                        <option value="@e.Id">👤 @e.EmployeeCode - @e.FullName (@e.Department)</option>
+                    }
+                </select>
+                <small class="text-muted">Assign asset to this employee</small>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="fw-bold">Quantity</label>
+                    <input type="number" class="form-control" min="1" @bind="quantity" />
+                    <small class="text-muted">Number of units</small>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="fw-bold">Expected Return Date</label>
+                    <input type="date" class="form-control" @bind="expectedReturnDate" />
+                    <small class="text-muted">When should it be returned?</small>
                 </div>
             </div>
-        </div>
 
-        @if (!string.IsNullOrEmpty(message))
-        {
-            <div class='alert alert-info mt-3'>@message</div>
-        }
+            <div class="mb-3">
+                <label class="fw-bold">Remarks</label>
+                <textarea class="form-control" rows="3" placeholder="Purpose of taking this asset..." @bind="remarks"></textarea>
+                <small class="text-muted">Optional notes or purpose</small>
+            </div>
+
+            <button class="btn btn-success w-100" @onclick="CheckoutAsset">✅ Confirm Checkout</button>
+        </div>
     </div>
+
+    @if (!string.IsNullOrEmpty(message))
+    {
+        <div class='alert alert-info mt-3'>@message</div>
+    }
 </div>
 
 @code {
